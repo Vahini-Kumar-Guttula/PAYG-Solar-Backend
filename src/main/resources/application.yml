@@ -1,0 +1,113 @@
+spring:
+  application:
+    name: payg-solar-backend
+  
+  # Default: H2 in-memory database for development/testing
+  datasource:
+    url: jdbc:h2:mem:payg_solar
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+  
+  sql:
+    init:
+      mode: never  # Disable schema.sql execution for H2
+  
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Application Configuration
+app:
+  payment:
+    overdue-days: 7
+    gateway:
+      url: https://api.mobilemoney.example.com
+      api-key: mock-api-key
+      timeout: 5000
+  
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    com.sunking.payg: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# MySQL Production Profile
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/payg_solar?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  
+  sql:
+    init:
+      mode: always  # Enable schema-mysql.sql execution for MySQL
+      schema-locations: classpath:schema-mysql.sql
